@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>가튼의 마수</title>
+	<meta charset="utf-8" />
+	<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<style>
+		div#ingame {
+			display: none;
+		}
+	</style>
+	<script>
+		const NUM_MIN = 1;
+		const NUM_MAX = 10000;
+		const OPPORTUNITY_MAX = 13;
+		const DEFAULT_TIMELIMIT_IN_SEC = 20;
+		const TIMELIMIT_DECREASE_INTERVAL = 100; // ms
+
+		const RESULT_UP = "UP!";
+		const RESULT_DOWN = "DoWN!"
+		const RESULT_CORRECT = "정답!"
+
+		function initGameParameters() {
+			timeLimit = DEFAULT_TIMELIMIT_IN_SEC * 1000;
+			timer = setInterval(function() {
+				timeLimit -= TIMELIMIT_DECREASE_INTERVAL;
+				$divTime.html("시간 : " + (timeLimit / 1000) + "초 남음");
+				if (timeLimit <= 0) {
+					clearInterval(timer);
+					gameOver();
+				}
+			}, TIMELIMIT_DECREASE_INTERVAL);
+
+			opportunity = 0;
+			answer = Math.floor(Math.random() * NUM_MAX) + NUM_MIN;
+		}
+
+		function initViews() {
+			$divText.html(NUM_MIN + "부터 " + NUM_MAX + "까지 숫자 하나를 맞춰보세요");
+			$inputNum.val("");
+			$divResult.html("숫자를 입력하세요!");
+		}
+
+		function goToGatenBlog() {
+			location.href = "http://blog.naver.com/dongbin30";
+		}
+
+		function goToTitle() {
+			$("#ingame").css("display", "none");
+			$("#title").css("display", "initial");
+		}
+
+		function startGame() {
+			initGameParameters();
+			initViews();
+			$("#ingame").css("display", "initial");
+			$("#title").css("display", "none");
+			$inputNum.focus();
+		}
+
+		function gameOver() {
+			alert("가튼의 함정에 걸려들었다 ㅠㅠ");
+			goToGatenBlog();
+		}
+
+		function gameClear() {
+			alert("가튼의 마수에서 벗어났따!!");
+			goToTitle();
+		}
+		
+		var $divTime, $inputNum;
+		var timeLimit, timer;
+		var opportunity;
+		var answer;
+		
+		$(document).ready(function() {
+			$buttonStart = $("button#start");
+			$divText = $("div#text");
+			$divTime = $("div#time");
+			$inputNum = $("input#num");
+			$divResult = $("div#result");
+			$divOpportunity = $("div#opportunity");
+
+			$inputNum.on("change", function() {
+				if (!$(this).val()) return;
+				let num = parseInt($(this).val());
+				
+				if (num === answer) {
+					clearInterval(timer);
+					gameClear();
+				}
+				else if (num < answer) {
+					$divResult.html(num + ", " + RESULT_UP);
+					$inputNum.val("");
+					$divOpportunity.html("기회 : " + (++opportunity) + " / " + OPPORTUNITY_MAX);
+				}
+				else {
+					$divResult.html(num + ", " + RESULT_DOWN);
+					$inputNum.val("");
+					$divOpportunity.html("기회 : " + (++opportunity) + " / " + OPPORTUNITY_MAX);
+				}
+
+				if (opportunity === OPPORTUNITY_MAX) {
+					clearInterval(timer);
+					setTimeout(gameOver, 300);
+				}
+			});
+			$buttonStart.on("click", startGame);
+		});
+	</script>
+</head>
+<body>
+<div id="title">
+	<button id="start">게임 시작</button>
+</div>
+<div id="ingame">
+	<div id="text"></div>
+	<input id="num" />
+	<div id="result"></div>
+	<div id="opportunity"></div>
+	<div id="time"></div>
+</div>
+</body>
+</html>
